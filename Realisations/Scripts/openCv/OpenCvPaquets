@@ -1,0 +1,78 @@
+#! /bin/sh
+
+################################################################################
+#                                                  			       #
+#                                                 	                       #
+#                      Automatisation Installation 	                       #
+#                           Paquets OpenCV                            	       #
+#                               Linux     		                       #
+#       F.Gicquel                                                              #
+################################################################################
+
+
+
+
+# Vérification de l'architecture materielle
+
+version=`uname -m`
+if [ $version != "x86_64" ] ; then
+	echo "cette fonctionnalité est prévue pour fonctionner sur une architecture 64 bits"
+	echo "vous êtes en 32 bits et ne pouvez donc l'utiliser"
+	exit
+fi
+
+# 
+apt-get update
+
+
+#Paquets pour la construction de l'environnement de développement 
+apt-get -y install build-essential cmake pkg-config
+
+#Bibliothèques I/O 
+if [ $? -eq 0 ] || [ $? != 2 ] ; then
+apt-get -y install libjpeg62-dev libtiff4-dev libjasper-dev
+fi
+
+#Bibliothèque GTK permettant de créer des interfaces graphiques (GUI)
+if [ $? -eq 0 ] || [ $? != 2 ] ; then
+apt-get -y install libgtk2.0-dev
+fi
+
+#Bibliothèque pour support Firewire des caméras vidéos
+if [ $? -eq 0 ] || [ $? != 2 ] ; then
+apt-get -y install libdc1394-22-dev
+fi
+
+#Bibliothèque pour la compilation d'application utilisant openCv 
+if [ $? -eq 0 ] || [ $? != 2 ] ; then
+apt-get install -y libhighgui-dev
+fi
+
+#[OPTION]#Bibliothèques pour le streaming vidéos 
+if [ $? -eq 0 ] || [ $? != 2 ] ; then
+apt-get -y install libxine-dev libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev
+fi
+
+#[OPTION]#Bibliothèques de l'environnement python et du numérique python
+if [ $? -eq 0 ] || [ $? != 2 ] ; then
+apt-get -y install python-dev python-numpy
+fi
+
+#[OPTION]# Installation de la bibliothèque Qt dev pour le dev en C++
+if [ $? -eq 0 ] || [ $? != 2 ] ; then
+apt-get install -y libqt4-dev
+fi
+
+
+
+
+# Installation de 
+#if [ $? -eq 0 ] || [ $? != 2 ] ; then
+#apt-get install -y 
+#fi
+
+
+# Installation de 
+#if [ $? -eq 0 ] || [ $? != 2 ] ; then
+#apt-get install -y 
+#fi

@@ -1,0 +1,42 @@
+#! /bin/sh
+
+################################################################################
+#                                                  			       #
+#                                                 	                       #
+#                      Automatisation Installation 	                       #
+#                           Install OpenCV                            	       #
+#                               Linux     		                       #
+#       F.Gicquel                                                              #
+################################################################################
+
+iam=$(whoami) # on stocke l'identifiant de l'utilisateur (qui a lancé le script) dans la variable "iam"
+if [ $iam != "root" ] # on teste ensuite si le contenu de "iam" est différent de "root"
+ 
+then # si le test est vrai, on va exécuter le script via sudo 
+
+	sudo $(echo $0) # la commande "echo $0" permet de récupérer le nom du fichier 
+			# qui contient notre script (ainsi que son chemin d'accès) 
+			# et on le relance en le préfixant de la commande sudo !
+ 	exit
+	sudo $(echo $0) || echo "Message" # la commande echo derrière le double |
+					  # permet de renvoyer un message à l'utilisateur
+					  # en cas d'échec de la commande sudo :
+					  # échec à la vérification du password
+					  # ou échec car l'utilisateur n'est pas référencé
+					  # dans le fichier "sudoers"
+ 
+	exit # c'est indispensable pour ne pas exécuter 2 fois 
+             # la partie exécutée comme simple utilisateur en fin de script !
+             # ou quitter le script en cas d'échec de la commande sudo...
+ 
+else # si on est bien root lorsque le script est exécuté, les commandes qui suivent seront exécutées :-)
+#Pour rendre les fichiers exécutables
+chmod 754 /opt/OpenCvPaquets
+chmod 754 /opt/BuildOpenCv
+#Lancement des scripts openCv
+bash /opt/./OpenCvPaquets
+bash /opt/./BuildOpenCv
+#	echo -e "Partie du script exécutée en tant que root...\n\nOK ! Vous êtes bien "$iam"...  ;-)"
+#	echo -e "\nExécution de la commande \"sfdisk -l\" qui ne renvoie des informations que si c'est root qui la lance :"
+
+fi
