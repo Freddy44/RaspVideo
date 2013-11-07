@@ -1,0 +1,49 @@
+#! /bin/sh
+
+################################################################################
+#                                                  			       #
+#                                                 	                       #
+#                      Automatisation Installation 	                       #
+#                           Build OpenCV                            	       #
+#                               Linux     		                       #
+#       F.Gicquel                                                              #
+################################################################################
+
+
+
+
+
+if [ $? -eq 0 ] || [ $? != 2 ] ; then
+wget http://sourceforge.net/projects/opencvlibrary/files/opencv-unix/2.4.6.1/opencv-2.4.6.1.tar.gz
+fi
+
+if [ $? -eq 0 ] || [ $? != 2 ] ; then
+tar xvf opencv-2.4.6.1.tar.gz
+fi
+
+
+if [ $? -eq 0 ] || [ $? != 2 ] ; then
+cd opencv-2.4.6.1
+fi
+
+if [ $? -eq 0 ] || [ $? != 2 ] ; then
+mkdir build
+cd build
+fi
+
+if [ $? -eq 0 ] || [ $? != 2 ] ; then
+cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D WITH_TBB=ON -D BUILD_NEW_PYTHON_SUPPORT=ON -D WITH_V4L=ON -D INSTALL_C_EXAMPLES=ON -D INSTALL_PYTHON_EXAMPLES=ON -D BUILD_EXAMPLES=ON -D WITH_QT=ON -D WITH_OPENGL=ON ..
+fi
+
+if [ $? -eq 0 ] || [ $? != 2 ] ; then
+make
+fi
+
+if [ $? -eq 0 ] || [ $? != 2 ] ; then
+make install
+fi
+
+
+
+
+
