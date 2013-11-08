@@ -11,16 +11,6 @@
 
 
 
-
-# Vérification de l'architecture materielle
-
-version=`uname -m`
-if [ $version != "x86_64" ] ; then
-	echo "cette fonctionnalité est prévue pour fonctionner sur une architecture 64 bits"
-	echo "vous êtes en 32 bits et ne pouvez donc l'utiliser"
-	exit
-fi
-
 # 
 apt-get update
 
@@ -43,7 +33,7 @@ if [ $? -eq 0 ] || [ $? != 2 ] ; then
 apt-get -y install libdc1394-22-dev
 fi
 
-#Bibliothèque pour la compilation d'application utilisant openCv 
+#Bibliothèque pour la compilation d'interface utilisant openCv 
 if [ $? -eq 0 ] || [ $? != 2 ] ; then
 apt-get install -y libhighgui-dev
 fi

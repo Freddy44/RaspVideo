@@ -27,8 +27,8 @@ cd opencv-2.4.6.1
 fi
 
 if [ $? -eq 0 ] || [ $? != 2 ] ; then
-mkdir build
-cd build
+mkdir release
+cd release
 fi
 
 if [ $? -eq 0 ] || [ $? != 2 ] ; then
