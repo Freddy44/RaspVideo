@@ -1,0 +1,1 @@
+g++ monProgramme.cpp -o monProg `pkg-config --cflags opencv` `pkg-config --libs opencv`
