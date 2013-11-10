@@ -1,0 +1,11 @@
+lib openCV:
+
+	-> creation d'un premier code avec méthodes
+		*construction et destruction d'une fenêtre : Tâche 200.02
+		*capture du flux vidéo : Tâche 200.04
+		*création d'une image à partir du flux : ->Tâche 200.04
+		*affichage de l'image dans la fenêtre crée: Tâche 200.02
+		*liberation de la mémoire (flux): Tâche 200.02
+		*arret de l'affichage par intervention du user: Tâche 200.02
+		*creation d'un cercle vide de couleur jaune : Tâche 200.02
+ 
