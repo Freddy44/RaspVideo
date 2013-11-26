@@ -1,0 +1,8 @@
+
+
+=> Cibler la cible : 200.07
+	à réussie à travers deux méthodes à déterminer le contour d'une balle. malheureusement
+	l'entourage n'est pas stable.
+	1ère: aux travers des méthodes openCv, findContours et drawContours notamment, qui permet de prendre la forme de l'objet;
+	2nd: à travers la méthode HoughCircles qui permet de déterminer un cercle autour de l'objet. Méthode=> deux problèmes : la stabilité et la profondeur d'action.
+Je vais continuer à travailler sur cette méthode qui me semble plus prométeuse au vue de notre projet et qui je pense demandera moins de ressources de calcul, qui est à prendre en considération pour la raspberry.
