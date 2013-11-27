@@ -4,21 +4,27 @@
 #include <stdio.h>
 #include <iostream>
 
-#include <cv.h>
-#include <highgui.h>
+//#include <cv.h>
+//#include <highgui.h>
+#include <opencv2/highgui/highgui.hpp>
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/objdetect/objdetect.hpp"
 #include "opencv2/core/core.hpp"
+#include <vector>
+#include  <opencv2/opencv.hpp>
+
 //#include <math.h>
 
 using namespace cv;
 
 CvSize size = cvSize(640,480);
+
 /**
 * Constante définissant le titre de la fenêtre
 */
 const char* wTitle = "RaspVideo";
 const char* wTitleGray = "RaspVideo Gray";
+
 
 
 //=======================================================//
@@ -136,7 +142,7 @@ IplImage* GetThresholdedImage(IplImage* img){
 	* @param cvScalar(50, 255, 255) : Limite supérieure de code BGR choisi => Jaune
 	* @param imgThreshed : Image du traitement finale
 	*/
-	cvInRangeS(imgHSV, cvScalar(40, 100, 100), cvScalar(50, 255, 255), imgThreshed);
+	cvInRangeS(imgHSV, cvScalar(35, 100, 100), cvScalar(75, 255, 255), imgThreshed);
 
 	/**
 	* Libère la mémoire allouée 
@@ -293,6 +299,67 @@ void drawCercle(IplImage* frame){
 }
 
 
+
+//=======================================================//
+// Méthode qui dessine un cercle autour de l'objet	 //
+//	et suit un objet selon sa position               //
+//=======================================================//
+
+void contourCercle(IplImage* img){
+	int thresh = 100;//=>
+	//int max_thresh = 255;
+	RNG rng(12345);
+	//Mat src(img);
+	Mat src_Gray(GetThresholdedImage(img));//=>
+	//blur de l'image gray
+	blur( src_Gray, src_Gray, Size(3,3) );//==>
+	
+	Mat canny_output;
+  	vector<vector<Point> > contours;
+  	vector<Vec4i> hierarchy;
+	
+	/// Detect edges using canny
+  	Canny( src_Gray, canny_output, thresh, thresh*2, 3 );
+  	/// Find contours CV_RETR_TREE
+  	findContours( canny_output, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+
+  	/// Draw contours /CV_FILLED
+  	Mat drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
+  	for( int i = 0; i< contours.size(); i++ )
+     {
+       Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+       drawContours( drawing, contours, i, color, 1, 8, hierarchy, 0, Point() );
+     }
+	imshow( "Contours", drawing );
+	//return drawing;
+	
+}
+
+//=======================================================//
+// Méthode HOUGHCircles qui dessine un cercle autour de l'objet	 //
+//	et suit un objet selon sa position               //
+//=======================================================//
+
+void contourCercle2(IplImage* img){
+	Mat src(img);
+	Mat src_Gray(GetThresholdedImage(img));//=>
+	// smooth it, otherwise a lot of false circles may be detected
+//http://docs.opencv.org/modules/imgproc/doc/filtering.html?highlight=gaussianblur#gaussianblur
+	GaussianBlur( src_Gray, src_Gray, Size(9, 9), 1, 1 );
+	vector<Vec3f> circles;
+//http://docs.opencv.org/search.html?q=HoughCircles&check_keywords=yes&area=default
+//HoughCircles(src_Gray, circles, CV_HOUGH_GRADIENT,2, src_Gray.rows/4, 200, 100 );
+    	HoughCircles(src_Gray, circles, CV_HOUGH_GRADIENT,2,  src_Gray.rows/4, 200, 100 );
+	for( size_t i = 0; i < circles.size(); i++ )
+    	{
+         Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+         int radius = cvRound(circles[i][2]);
+	// draw the circle outline
+         circle( src, center, radius, Scalar(209, 182, 6), 3, 8, 0 );//Scalar(0,0,255)
+    }
+
+}
+
 //=======================================================//
 // Affiche une image                                     //
 //=======================================================//
@@ -354,7 +421,10 @@ void DisplayVideo(CvCapture* capture){//, int time
 	*/
 	cvNamedWindow(wTitle,CV_WINDOW_AUTOSIZE);
 	cvNamedWindow(wTitleGray,CV_WINDOW_AUTOSIZE);
-
+	
+	IplImage* img;
+	
+	
 	/**
 	* Boucle infinie permettant d'afficher l'image dans une fenêtre
 	* en attendant une action de l'utilisateur
@@ -364,7 +434,7 @@ void DisplayVideo(CvCapture* capture){//, int time
 		* Constructeur de la structure de l'image via la méthode imgFrame()
 		* @param capture : Capture du flux vidéo
 		*/
-		IplImage* img = imgFrame(capture);//TODO=> detruire
+		img = imgFrame(capture);//TODO=> detruire
 
 		/**
 		* Condition:
@@ -381,8 +451,10 @@ void DisplayVideo(CvCapture* capture){//, int time
 		* Appel de la méthode drawCercle
 		* @param img : image créée plus haut
 		*/
-		drawCercle(img);
+		//drawCercle(img);
 		
+		//contourCercle( img);
+		contourCercle2(img);
 		/**
 		* Montre l'image dans une fenêtre spécifiée
 		* void cvShowImage( const char* name, const CvArr* image );
@@ -425,7 +497,7 @@ void DisplayVideo(CvCapture* capture){//, int time
 	* void cvReleaseImage( IplImage** image );
 	* @param &img : pointeur sur la structure de l'image créée
 	*/
-	//cvReleaseImage(&img);//TODO
+	cvReleaseImage(&img);
 }
 
 
