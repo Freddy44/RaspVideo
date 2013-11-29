@@ -1,6 +1,6 @@
 
 
-=> Cibler la cible : 200.07
+=> Cibler la cible : 200.06
 	à réussie à travers deux méthodes à déterminer le contour d'une balle. malheureusement
 	l'entourage n'est pas stable.
 	1ère: aux travers des méthodes openCv, findContours et drawContours notamment, qui permet de prendre la forme de l'objet;
