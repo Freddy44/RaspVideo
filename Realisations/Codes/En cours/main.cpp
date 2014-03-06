@@ -9,6 +9,9 @@
 #include "Constantes.h"
 #include "Camera.h"
 #include "TraitementImage.h"
+#include "Uart.h"
+#include "Tramage.h"
+
 
 #include <fstream>
 #include <iostream>
@@ -32,13 +35,15 @@ void callbackButton(int state, void* userdata)
 */
 int main(int argc, char *argv[])
 {
-                        cout << "\E[30;1m ******************************* \E[m\n";
-                        cout << "\E[30;1m *********** BONJOUR *********** \E[m\n";
-                        cout << "\E[30;1m ******************************* \E[m\n";
+    cout << "\E[30;1m ******************************* \E[m\n";
+    cout << "\E[30;1m *********** BONJOUR *********** \E[m\n";
+    cout << "\E[30;1m ******************************* \E[m\n";
 
-                            /***********************************/
-                            /*** Initialisation du programme ***/
-                            /***********************************/
+    usleep(500000);
+
+                                                /***********************************/
+                                                /*** Initialisation du programme ***/
+                                                /***********************************/
 
     /* Contrôle dans un terminal */
     cout << "\E[30;1m main (0) :\E[m\n";
@@ -53,6 +58,8 @@ int main(int argc, char *argv[])
     int satMax;
     int valMin;
     int valMax;
+    int trameDemandee;
+    int trame;
 
     /* */
     Mat src_;
@@ -95,10 +102,14 @@ int main(int argc, char *argv[])
         fichier >> satMax;
         fichier >> valMin;
         fichier >> valMax;
+        fichier >> trameDemandee;
         /* Fermeture du fichier */
         fichier.close();
-    }else{
-            cerr << "Erreur à l'ouverture : Fichier inexistant !" << endl;}
+    }
+    else
+    {
+        cerr << "Erreur à l'ouverture : Fichier inexistant !" << endl;
+    }
 
     /*** Création des trackbars destinés aux changements de la luminosité ***/
     /************************************************************************/
@@ -116,12 +127,27 @@ int main(int argc, char *argv[])
     createTrackbar("Val_Min", wTitleGray, &valMin, 250);
     createTrackbar("Val_Max", wTitleGray, &valMax, 250);
 
-    createButton("test",callbackButton,NULL,CV_PUSH_BUTTON,1);
+    /* Pour activer l'envoie de trame vers l'ardiuno */
+    createTrackbar("Send_Trame", wTitle, &trameDemandee, 1);
 
 
-                            /**************************************/
-                            /*** Boucle principale du programme ***/
-                            /**************************************/
+    /*** Initialisation du port série ***/
+    /************************************/
+    Uart* portSerie = new Uart();
+    int port = portSerie->getPort();
+    if (port <0){
+		perror("Port configure ");
+		return 0;//EXIT_FAILURE;
+	}
+
+    /*** Initialisation de la trame ***/
+    /**********************************/
+    Tramage* trameAsked = new Tramage();
+
+
+                                                /**************************************/
+                                                /*** Boucle principale du programme ***/
+                                                /**************************************/
     while(1)
     {
         /* Contrôle dans un terminal */
@@ -166,24 +192,60 @@ int main(int argc, char *argv[])
         /********************************/
         cout << "CenterCircleX : " << traitement->get_PointCenterCircleX() << " <=> " << "CenterCircleY : " << traitement->get_PointCenterCircleY() << " <=> " << "Radius : " << traitement->get_RadiusCircle() << "\n";
 
-        if ( traitement->get_PointCenterCircleX() && traitement->get_PointCenterCircleY())
+        if (trameDemandee == 1)
         {
-            if ((traitement->get_PointCenterCircleX()>=0 && traitement->get_PointCenterCircleX()<319))
+            trame = 0;
+
+            if ( traitement->get_PointCenterCircleX() && traitement->get_PointCenterCircleY())
             {
-                cout << "le robot doit tourner à gauche" << endl;
-            }else if ((traitement->get_PointCenterCircleX()>319 && traitement->get_PointCenterCircleX()<=638))
+                if ((traitement->get_PointCenterCircleX()>=0 && traitement->get_PointCenterCircleX()<315))
+                {
+                    cout << "le robot doit tourner à gauche" << endl;
+                    trame = 1;
+                    trameAsked->setCommande(trame);
+                    portSerie->send_data(trameAsked->getCommande(),port);
+                    usleep(100000);
+                    portSerie->read_data(port);
+                }
+                else if ((traitement->get_PointCenterCircleX()>324 && traitement->get_PointCenterCircleX()<=638))
                 {
                     cout << "le robot doit tourner à droite" << endl;
+                    trame = 2;
+                    trameAsked->setCommande(trame);
+                    portSerie->send_data(trameAsked->getCommande(),port);
+                    usleep(100000);
+                    portSerie->read_data(port);
                 }
-            else{ cout << "wait !!!!!" << endl;}
+                else
+                {
+                    cout << "wait !!!!!" << endl;
+                    trame = 3;
+                    trameAsked->setCommande(trame);
+                    portSerie->send_data(trameAsked->getCommande(),port);
+                    usleep(100000);
+                    portSerie->read_data(port);
+                }
+            }
 
+            if (traitement->get_RadiusCircle() >= 15 && traitement->get_RadiusCircle() <= 90)
+            {
+                cout << "le robot doit avancer" << endl;
+                trame = 4;
+                trameAsked->setCommande(trame);
+                portSerie->send_data(trameAsked->getCommande(),port);
+                usleep(100000);
+                portSerie->read_data(port);
+            }
+            else
+            {
+                cout << "la camera doit tracker la balle " << endl;
+                trame = 5 ;
+                trameAsked->setCommande(trame);
+                portSerie->send_data(trameAsked->getCommande(),port);
+                usleep(100000);
+                portSerie->read_data(port);
+            }
         }
-
-        if (traitement->get_RadiusCircle() >= 15 && traitement->get_RadiusCircle() <= 90)
-        {
-             cout << "le robot doit avancer" << endl;
-        }else {cout << "la camera doit tracker la balle " << endl; }
-
         /*** Affichage des images traitées ***/
         /*************************************/
         /* Contrôle dans un terminal */
@@ -192,9 +254,9 @@ int main(int argc, char *argv[])
         cvShowImage(wTitleGray, imgHsv);
 
 
-                             /**********************************/
-                             /*** Fermeture de l'application ***/
-                             /**********************************/
+        /**********************************/
+        /*** Fermeture de l'application ***/
+        /**********************************/
 
         /*** Dès que le signal de la touche Escape est reçu ***/
         if( (cvWaitKey(10) & 255) == 27 )
@@ -219,27 +281,33 @@ int main(int argc, char *argv[])
                 fichier << (int)satMax << endl;
                 fichier << (int)valMin << endl;
                 fichier << (int)valMax << endl;
+                fichier << (int)trameDemandee << endl;
                 fichier.close();  // on referme le fichier
-            }else{
-                    cerr << "Erreur à l'ouverture !" << endl;}
+            }
+            else
+            {
+                cerr << "Erreur à l'ouverture !" << endl;
+            }
 
             /* Sortie de la boucle */
             break;
         }
     }
 
-    /*******************/
-    /*** Destruction ***/
-    /*******************/
+    /*****************************/
+    /*** Destruction/Fermeture ***/
+    /****************************/
+    /*** Fermeture du port série ***/
+    portSerie->uartClose();
     /*** Des fenêtres */
     cvDestroyAllWindows();
     /*** Des Images */
     cvReleaseImage(&imgCam);
     cvReleaseImage(&imgHsv);
 
-                cout << "\E[30;1m ******************************* \E[m\n";
-                cout << "\E[30;1m ********** AU REVOIR ********** \E[m\n";
-                cout << "\E[30;1m ******************************* \E[m\n";
+    cout << "\E[30;1m ******************************* \E[m\n";
+    cout << "\E[30;1m ********** AU REVOIR ********** \E[m\n";
+    cout << "\E[30;1m ******************************* \E[m\n";
     /*** fin du programme ***/
     return EXIT_SUCCESS; // => return 0;
 }

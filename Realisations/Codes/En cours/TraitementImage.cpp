@@ -332,6 +332,7 @@ IplImage* TraitementImage::get_ImgThresholded()
 }
 
 /***
+* Getter
 * Retourne le point de coordonnée X du centre du cercle
 * @return: m_cercleCentreX et m_cercleCentreY
 */
@@ -343,6 +344,7 @@ float TraitementImage::get_PointCenterCircleX()
 }
 
 /***
+* Getter
 * Retourne le point de coordonnée Y du centre du cercle
 * @return: m_cercleCentreY
 */
@@ -354,6 +356,7 @@ float TraitementImage::get_PointCenterCircleY()
 }
 
 /***
+* Getter
 * Retourne le point de coordonnée Y du centre du cercle
 * @return: m_cercleCentreY
 */
