@@ -1,0 +1,1 @@
+ g++ main.cpp Camera.cpp TraitementImage.cpp Uart.cpp Tramage.cpp Constantes.h -o RaspVideo `pkg-config --cflags opencv` `pkg-config --libs opencv` 

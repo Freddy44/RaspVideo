@@ -47,101 +47,90 @@ void Tramage::trameToSpend()
     cout << "\E[34;1m Tramage (3.0): trameToSpend \E[m\n";
     switch (m_trame)
     {
+
+        /** Commande pour tourner à gauche */
     case 1:
         m_tramage[0] = '-';
-        m_tramage[1] = '+';
-        m_tramage[2] = '+';
-        m_tramage[3] = '+';
-        m_tramage[4] = '+';
+        m_tramage[1] = '0';
+        m_tramage[2] = '0';
+        m_tramage[3] = '1';
+        m_tramage[4] = '0';
         m_tramage[5] = '+';
-        m_tramage[6] = '+';
-        m_tramage[7] = '+';
-        m_tramage[8] = '+';
-        m_tramage[9] = '+';
-        m_tramage[10] = '+';
-        m_tramage[11] = '+';
-        m_tramage[12] = '+';
-        m_tramage[13] = '\r';
-        m_tramage[14] = '\n';
+        m_tramage[6] = '0';
+        m_tramage[7] = '0';
+        m_tramage[8] = '0';
+        m_tramage[9] = '0';
+        m_tramage[10] = '0';
+        m_tramage[11] = '0';
+        m_tramage[12] = '\r';
+        m_tramage[13] = '\n';
         /* Contrôle dans un terminal */
         cout << "\E[34;1m Tramage (3.1): trameToSpend => gauche\E[m\n";
         break;
+
+        /** Commande pour tourner à Droite */
     case 2:
-        m_tramage[0] = '-';
-        m_tramage[1] = '-';
-        m_tramage[2] = '+';
-        m_tramage[3] = '+';
-        m_tramage[4] = '+';
+        m_tramage[0] = '+';
+        m_tramage[1] = '0';
+        m_tramage[2] = '0';
+        m_tramage[3] = '1';
+        m_tramage[4] = '0';
         m_tramage[5] = '+';
-        m_tramage[6] = '+';
-        m_tramage[7] = '+';
-        m_tramage[8] = '+';
-        m_tramage[9] = '+';
-        m_tramage[10] = '+';
-        m_tramage[11] = '+';
-        m_tramage[12] = '+';
-        m_tramage[13] = '\r';
-        m_tramage[14] = '\n';
+        m_tramage[6] = '0';
+        m_tramage[7] = '0';
+        m_tramage[8] = '0';
+        m_tramage[9] = '0';
+        m_tramage[10] = '0';
+        m_tramage[11] = '0';
+        m_tramage[12] = '\r';
+        m_tramage[13] = '\n';
         /* Contrôle dans un terminal */
         cout << "\E[34;1m Tramage (3.2): trameToSpend => droite \E[m\n";
         break;
 
+        /** Commande pour attendre */
     case 3:
-        m_tramage[0] = '-';
-        m_tramage[1] = '-';
-        m_tramage[2] = '-';
-        m_tramage[3] = '+';
-        m_tramage[4] = '+';
+        m_tramage[0] = '+';
+        m_tramage[1] = '0';
+        m_tramage[2] = '0';
+        m_tramage[3] = '0';
+        m_tramage[4] = '0';
         m_tramage[5] = '+';
-        m_tramage[6] = '+';
-        m_tramage[7] = '+';
-        m_tramage[8] = '+';
-        m_tramage[9] = '+';
-        m_tramage[10] = '+';
-        m_tramage[11] = '+';
-        m_tramage[12] = '+';
-        m_tramage[13] = '\r';
-        m_tramage[14] = '\n';
+        m_tramage[6] = '0';
+        m_tramage[7] = '0';
+        m_tramage[8] = '0';
+        m_tramage[9] = '0';
+        m_tramage[10] = '0';
+        m_tramage[11] = '0';
+        m_tramage[12] = '\r';
+        m_tramage[13] = '\n';
         /* Contrôle dans un terminal */
         cout << "\E[34;1m Tramage (3.3): trameToSpend => attente \E[m\n";
         break;
 
+        /** Commande pour avancer */
     case 4:
-        m_tramage[0] = '-';
-        m_tramage[1] = '-';
-        m_tramage[2] = '-';
-        m_tramage[3] = '-';
-        m_tramage[4] = '+';
+        m_tramage[0] = '+';
+        m_tramage[1] = '0';
+        m_tramage[2] = '0';
+        m_tramage[3] = '0';
+        m_tramage[4] = '0';
         m_tramage[5] = '+';
-        m_tramage[6] = '+';
-        m_tramage[7] = '+';
-        m_tramage[8] = '+';
-        m_tramage[9] = '+';
-        m_tramage[10] = '+';
-        m_tramage[11] = '+';
-        m_tramage[12] = '+';
-        m_tramage[13] = '\r';
-        m_tramage[14] = '\n';
+        m_tramage[6] = '0';
+        m_tramage[7] = '0';
+        m_tramage[8] = '1';
+        m_tramage[9] = '0';
+        m_tramage[10] = '0';
+        m_tramage[11] = '0';
+        m_tramage[12] = '\r';
+        m_tramage[13] = '\n';
         /* Contrôle dans un terminal */
         cout << "\E[34;1m Tramage (3.4): trameToSpend => avancer \E[m\n";
         break;
 
+        /** Commande pour Tracker la cible */
     case 5:
-        m_tramage[0] = '-';
-        m_tramage[1] = '-';
-        m_tramage[2] = '-';
-        m_tramage[3] = '-';
-        m_tramage[4] = '-';
-        m_tramage[5] = '+';
-        m_tramage[6] = '+';
-        m_tramage[7] = '+';
-        m_tramage[8] = '+';
-        m_tramage[9] = '+';
-        m_tramage[10] = '+';
-        m_tramage[11] = '+';
-        m_tramage[12] = '+';
-        m_tramage[13] = '\r';
-        m_tramage[14] = '\n';
+
         /* Contrôle dans un terminal */
         cout << "\E[34;1m Tramage (3.5): trameToSpend => tracker \E[m\n";
         break;
@@ -149,12 +138,7 @@ void Tramage::trameToSpend()
     default:
         cout<<"\E[34;1m Tramage (3.6):Error, bad input, quitting \E[m\n";
         break;
-
     }
-
-
-
-
 }
 
 

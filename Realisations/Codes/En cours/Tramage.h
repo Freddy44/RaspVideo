@@ -3,6 +3,7 @@
  *
  *      Author: Frédéric Gicquel
  *
+ * Classe qui prépare la trame à envoyer vers le robot
  *********************************/
 
 
@@ -18,26 +19,25 @@ class Tramage
 {
 public:
 
-    /* Constructeur */
+    /** Constructeur */
     Tramage();
 
     /* Destructeur */
     virtual ~Tramage();
 
-    /* Méthodes */
+    /** Méthodes */
     /* Setters */
     void setCommande(char commande);
     /* Getters */
     char* getCommande();
 protected:
 private:
-    /* Méthodes */
+    /** Méthodes */
     void trameToSpend();
     char to_char(char str);
-    /* Attributs */
+    /** Attributs */
     char m_trame;
-    char m_tramage[15];
-
+    char m_tramage[14];
 
 };
 

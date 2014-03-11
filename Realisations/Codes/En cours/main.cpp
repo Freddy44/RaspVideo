@@ -4,34 +4,28 @@
  *      Author: Frédéric Gicquel
  *********************************/
 
-
-#include "FluxInfo.h"
+/**Fichiers d'entête relatifs au projet**/
 #include "Constantes.h"
 #include "Camera.h"
 #include "TraitementImage.h"
 #include "Uart.h"
 #include "Tramage.h"
 
-
-#include <fstream>
-#include <iostream>
+/**Relatifs aux bibliothèques**/
+#include <fstream> //Pour les opérations E/S sur des fichiers
+#include <iostream> //Pour les opérations d'E/S standard (cout/cin/cerr/clog)
 using namespace std;
 
-#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/imgproc/imgproc.hpp" //Processus des images
 using namespace cv;
-#include <sqlite3.h>
 
-void callbackButton(int state, void* userdata)
-{
-
-    cout <<"test button" << endl;
-}
 
 /*
-* Méthode
-*
-* @param:
-* @return:
+* Méthode main()
+* Méthode d'entrée du programme
+* @param: int argc => compteur sur le nombre de chaines de caractères contenu dans le tableau argv[]
+* @param: char *argv[] => pointeur sur le tableau contenant des chaines de caractères
+* @return: int => 0 si le programme c'est arreter dans de bonne condition
 */
 int main(int argc, char *argv[])
 {
@@ -41,9 +35,9 @@ int main(int argc, char *argv[])
 
     usleep(500000);
 
-                                                /***********************************/
-                                                /*** Initialisation du programme ***/
-                                                /***********************************/
+                                                        /***********************************/
+                                                        /*** Initialisation du programme ***/
+                                                        /***********************************/
 
     /* Contrôle dans un terminal */
     cout << "\E[30;1m main (0) :\E[m\n";
@@ -58,11 +52,11 @@ int main(int argc, char *argv[])
     int satMax;
     int valMin;
     int valMax;
-    int trameDemandee;
+    int sendFrame;
     int trame;
 
     /* */
-    Mat src_;
+    // Mat src_;
     Mat src ;
     IplImage* imgCam;
     IplImage* imgHsv;
@@ -83,10 +77,9 @@ int main(int argc, char *argv[])
     cout << "\E[30;1m main (0.12) : Création Fenêtres \E[m\n";
     cvNamedWindow(wTitle,CV_WINDOW_AUTOSIZE);
     cvNamedWindow(wTitleGray,CV_WINDOW_AUTOSIZE);
-    //namedWindow("TracBars", 1);
 
-    /*** Lecture des anciennes valeurs associées aux trackbars ***/
-    /************************************************************/
+    /*** Lecture des anciennes valeurs de seuils associées aux trackbars ***/
+    /***********************************************************************/
 
     /*** Ouverture du fichier ***/
     ifstream fichier("DataTrackbar.txt"/*, ios::in*/);
@@ -102,7 +95,7 @@ int main(int argc, char *argv[])
         fichier >> satMax;
         fichier >> valMin;
         fichier >> valMax;
-        fichier >> trameDemandee;
+        fichier >> sendFrame;
         /* Fermeture du fichier */
         fichier.close();
     }
@@ -111,12 +104,11 @@ int main(int argc, char *argv[])
         cerr << "Erreur à l'ouverture : Fichier inexistant !" << endl;
     }
 
-    /*** Création des trackbars destinés aux changements de la luminosité ***/
-    /************************************************************************/
+    /*** Création des trackbars destinés aux changements des paramètres de seuils***/
+    /*******************************************************************************/
 
     /* Contrôle dans un terminal */
     cout << "\E[30;1m main (0.3) : création tracBar \E[m\n";
-    //cvGetTrackbarPos("Hue Min", "TracBars");
     /* Pour La teinte */
     createTrackbar("Hue_Min", wTitleGray, &hueMin, 250);
     createTrackbar("Hue_Max", wTitleGray, &hueMax, 250);
@@ -128,26 +120,27 @@ int main(int argc, char *argv[])
     createTrackbar("Val_Max", wTitleGray, &valMax, 250);
 
     /* Pour activer l'envoie de trame vers l'ardiuno */
-    createTrackbar("Send_Trame", wTitle, &trameDemandee, 1);
+    createTrackbar("Send_Frame", wTitle, &sendFrame, 1);
 
 
     /*** Initialisation du port série ***/
     /************************************/
     Uart* portSerie = new Uart();
     int port = portSerie->getPort();
-    if (port <0){
-		perror("Port configure ");
-		return 0;//EXIT_FAILURE;
-	}
+    if (port <0)
+    {
+        perror("Port configure ");
+        return 0;//EXIT_FAILURE;
+    }
 
     /*** Initialisation de la trame ***/
     /**********************************/
-    Tramage* trameAsked = new Tramage();
+    Tramage* frameReceived  = new Tramage();
 
 
-                                                /**************************************/
-                                                /*** Boucle principale du programme ***/
-                                                /**************************************/
+                                                                /**************************************/
+                                                                /*** Boucle principale du programme ***/
+                                                                /**************************************/
     while(1)
     {
         /* Contrôle dans un terminal */
@@ -155,13 +148,13 @@ int main(int argc, char *argv[])
 
         /*** Traitements et récupération des images traitées ***/
         /*******************************************************/
-        traitement->setTrackImage(camera->getFrame());
-        traitement->traitementImage();
-        imgCam = traitement->get_FrameImg();
+        traitement->setTrackImage(camera->getImage());
+        traitement->imageProcessing();
+        imgCam = traitement->get_ImgCircles();
         imgHsv = traitement->get_ImgThresholded();
 
-        /*** Envoie des datas de luminosité ***/
-        /**************************************/
+        /*** Envoie des données de seuils ***/
+        /************************************/
         /* Contrôle dans un terminal */
         cout << "\E[30;1m main (0.42) : Envoie datas luminosites \E[m\n";
         traitement->setHueMin(hueMin);
@@ -171,28 +164,27 @@ int main(int argc, char *argv[])
         traitement->setValMin(valMin);
         traitement->setValMax(valMax);
 
-        /*** ***/
-        /*******/
+        /***Action des trackbars sur l'image ***/
+        /***************************************/
         /* Contrôle dans un terminal */
-        cout << "\E[30;1m main (0.43) : conversion tracBar \E[m\n";
+        cout << "\E[30;1m main (0.43) : conversion trackBar \E[m\n";
         src = (Mat)imgHsv;
         Mat dst;
-        //int iBrightness  = hueMin;
+        /* Conversion de l'image source selon les paramètres de seuils */
         src.convertTo(dst, -1, hueMin);
         src.convertTo(dst, -1, hueMax);
         src.convertTo(dst, -1, satMin);
         src.convertTo(dst, -1, satMax);
         src.convertTo(dst, -1, valMin);
         src.convertTo(dst, -1, valMax);
-
-        //IplImage* _imgHsv = cvCreateImage(cvSize(640,480), IPL_DEPTH_8U, 1);
+        /* Restitution de l'image après modification */
         imgHsv->imageData = (char *) dst.data;
 
         /*** Envoie Ordre à l'arduino ***/
         /********************************/
         cout << "CenterCircleX : " << traitement->get_PointCenterCircleX() << " <=> " << "CenterCircleY : " << traitement->get_PointCenterCircleY() << " <=> " << "Radius : " << traitement->get_RadiusCircle() << "\n";
 
-        if (trameDemandee == 1)
+        if (sendFrame == 1)
         {
             trame = 0;
 
@@ -202,8 +194,8 @@ int main(int argc, char *argv[])
                 {
                     cout << "le robot doit tourner à gauche" << endl;
                     trame = 1;
-                    trameAsked->setCommande(trame);
-                    portSerie->send_data(trameAsked->getCommande(),port);
+                    frameReceived->setCommande(trame);
+                    portSerie->send_data(frameReceived->getCommande(),port);
                     usleep(100000);
                     portSerie->read_data(port);
                 }
@@ -211,8 +203,8 @@ int main(int argc, char *argv[])
                 {
                     cout << "le robot doit tourner à droite" << endl;
                     trame = 2;
-                    trameAsked->setCommande(trame);
-                    portSerie->send_data(trameAsked->getCommande(),port);
+                    frameReceived->setCommande(trame);
+                    portSerie->send_data(frameReceived->getCommande(),port);
                     usleep(100000);
                     portSerie->read_data(port);
                 }
@@ -220,8 +212,8 @@ int main(int argc, char *argv[])
                 {
                     cout << "wait !!!!!" << endl;
                     trame = 3;
-                    trameAsked->setCommande(trame);
-                    portSerie->send_data(trameAsked->getCommande(),port);
+                    frameReceived->setCommande(trame);
+                    portSerie->send_data(frameReceived->getCommande(),port);
                     usleep(100000);
                     portSerie->read_data(port);
                 }
@@ -231,21 +223,31 @@ int main(int argc, char *argv[])
             {
                 cout << "le robot doit avancer" << endl;
                 trame = 4;
-                trameAsked->setCommande(trame);
-                portSerie->send_data(trameAsked->getCommande(),port);
+                frameReceived->setCommande(trame);
+                portSerie->send_data(frameReceived->getCommande(),port);
                 usleep(100000);
                 portSerie->read_data(port);
             }
+            else if (traitement->get_RadiusCircle() <= 15 && traitement->get_RadiusCircle() >= 90)
+                {
+                    cout << "wait !!!!!" << endl;
+                    trame = 3;
+                    frameReceived->setCommande(trame);
+                    portSerie->send_data(frameReceived->getCommande(),port);
+                    usleep(100000);
+                    portSerie->read_data(port);
+                }
             else
             {
                 cout << "la camera doit tracker la balle " << endl;
                 trame = 5 ;
-                trameAsked->setCommande(trame);
-                portSerie->send_data(trameAsked->getCommande(),port);
+                frameReceived->setCommande(trame);
+                portSerie->send_data(frameReceived->getCommande(),port);
                 usleep(100000);
                 portSerie->read_data(port);
             }
         }
+
         /*** Affichage des images traitées ***/
         /*************************************/
         /* Contrôle dans un terminal */
@@ -254,9 +256,9 @@ int main(int argc, char *argv[])
         cvShowImage(wTitleGray, imgHsv);
 
 
-        /**********************************/
-        /*** Fermeture de l'application ***/
-        /**********************************/
+                                                                /**********************************/
+                                                                /*** Fermeture de l'application ***/
+                                                                /**********************************/
 
         /*** Dès que le signal de la touche Escape est reçu ***/
         if( (cvWaitKey(10) & 255) == 27 )
@@ -264,7 +266,6 @@ int main(int argc, char *argv[])
             /* Contrôle dans un terminal */
             cout << "\E[30;1m main (0.5) : Fin programme \E[m\n";
 
-            //cvSetTrackbarPos("Hue Min", "TracBars", hueMin);
             /*** Sauvegarde des données des couleurs tracker ***/
             /***************************************************/
 
@@ -281,7 +282,7 @@ int main(int argc, char *argv[])
                 fichier << (int)satMax << endl;
                 fichier << (int)valMin << endl;
                 fichier << (int)valMax << endl;
-                fichier << (int)trameDemandee << endl;
+                fichier << (int)sendFrame << endl;
                 fichier.close();  // on referme le fichier
             }
             else

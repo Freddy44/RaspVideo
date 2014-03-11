@@ -1,12 +1,12 @@
-/************************************************
+/*********************************************************
  * Camera.h
  *
  *      Author: Frédéric Gicquel
  *
- *  Classe qui capture et renvoie le flux vidéo
+ *  Classe qui capture le flux vidéo et renvoie une image
  *  @return: Image numérisée
  *
- ************************************************/
+ *********************************************************/
 #ifndef CAMERA_H
 #define CAMERA_H
 
@@ -15,13 +15,9 @@
 #include <iostream>
 using namespace std;
 
-//=>Video
-#include "opencv2/imgproc/imgproc.hpp"
+// Pour interface grpah, manip fichier img/vidéo, interface de capture
 #include <opencv2/highgui/highgui.hpp>
-#include "opencv2/core/core.hpp"
-#include "opencv2/objdetect/objdetect.hpp"
-// VideoCapture
-#include  <opencv2/opencv.hpp>
+
 
 /********************************/
 /*** Déclaration de la classe ***/
@@ -29,27 +25,27 @@ using namespace std;
 class Camera
 {
 public:
-    /* Constructeur */
+    /** Constructeur */
     Camera();
 
-    /* Destructeur */
+    /** Destructeur */
     virtual ~Camera();
 
-    /* Méthodes */
-    // Getter de l'image récupérée
-    IplImage* getFrame();
+    /** Méthodes */
+    /* Getter de l'image récupérée */
+    IplImage* getImage();
 
 protected:
 
 private:
-    /* Attributs */
+    /** Attributs */
     CvCapture* m_Capture;
-    IplImage* m_frame;
+    IplImage* m_Image;
 
-    /* Méthodes */
+    /** Méthodes */
     void close();
     CvCapture* open();
-    IplImage* grabOneFrame();
+    IplImage* capturedImg();
 };
 
 #endif // CAMERA_H

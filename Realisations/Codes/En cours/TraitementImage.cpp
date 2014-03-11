@@ -11,19 +11,9 @@
 TraitementImage::TraitementImage()
 {
     /* Contrôle dans un terminal :
-     *
      * \E[3x;1m ... \E[m : couleur d'affichage (30 < x < 37) => ici vert
-     *
      */
     cout << "\E[32;1m TraitementImage:: Constructeur(2.0) :\E[m\n";
-
-
-    /*m_hueMin = 0;
-    m_hueMax = 0;
-    m_SatMin = 0;
-    m_SatMax = 0;
-    m_ValMin = 0;
-    m_ValMax = 0;*/
 }
 
 /*** Destructeur ***/
@@ -42,9 +32,9 @@ TraitementImage::~TraitementImage()
     cvReleaseImage(&m_imgThresholded);
 }
 
-                                            /***************/
-                                            /*** Setters ***/
-                                            /***************/
+                                        /***************/
+                                        /*** Setters ***/
+                                        /***************/
 
 /***
 * Setter setTrackImage(IplImage* img)
@@ -66,25 +56,12 @@ void TraitementImage::setTrackImage(IplImage* img)
     * @return:
     */
     m_img = img;
-    m_imgHSV    = cvCreateImage(cvGetSize(m_img), IPL_DEPTH_8U, 3);
-    m_imgThresholded   = cvCreateImage(cvGetSize(m_img), IPL_DEPTH_8U, 1);
+    m_imgHSV    = cvCreateImage(cvGetSize(m_img), IPL_DEPTH_8U, 3); // Pour la convertion en HSV. Préférable pour le travaille de la segmentation des couleurs.
+    m_imgThresholded   = cvCreateImage(cvGetSize(m_img), IPL_DEPTH_8U, 1);//Pour le travaille au niveau de gris
 
     /* Contrôle dans un terminal */
     cout << "\E[32;1m TraitementImage::setThresholdedImage(2.2) : creations images \E[m\n";
 }
-
-/*
-void TraitementImage::testTracbarCallback()
-{
-
-    Mat src_ = (Mat)m_imgThresholded;
-    //src = (Mat)src_;
-    cout << "\E[32;1m TraitementImage (2.3) : conversion tracBar \E[m\n";
-    Mat dst;
-    //int iBrightness  = hueMin;
-    src_.convertTo(dst, -1, m_hueMin);
-
-}*/
 
 /***
 * Setter setHueMin(unsigned char hm)
@@ -152,33 +129,29 @@ void TraitementImage::setValMax(unsigned char vM)
     m_ValMax = vM;
 }
 
+
+                                        /*******************/
+                                        /*** Traitements ***/
+                                        /*******************/
+
 /***
-* Méthode traitementImage()
+* Méthode imageProcessing()
 * Traitements de l'image ( )
 * @param:
 * @return:
 */
-void TraitementImage::traitementImage()
+void TraitementImage::imageProcessing()
 {
     /* Contrôle dans un terminal */
-    cout << "\E[32;1m TraitementImage (2.4) : traitementImage \E[m\n";
+    cout << "\E[32;1m TraitementImage (2.4) : imageProcessing \E[m\n";
 
-    /*** Préparation au traitement ***/
-    /*********************************/
+                /*** Préparation au traitement ***/
+                /*********************************/
 
     /* Contrôle dans un terminal */
     cout << "\E[32;1m TraitementImage (2.41) : CvScalar \E[m\n";
 
-    /* Tableau de valeurs (teinte, saturation, valeur ) */
-
-    ///////exemples /////
-    // Detect a red ball<br />
-    //CvScalar red_min = cvScalar(150, 84, 130, 0);
-    //CvScalar red_max = cvScalar(358, 256, 255, 0);
-
-    // Detection d'une balle jaune */
-    //CvScalar jaune_min = cvScalar(50, 100, 100,0);
-    //CvScalar jaune_max = cvScalar(75, 255, 255,0);
+    /*** Tableau de valeurs (teinte, saturation, valeur ) ***/
 
     CvScalar val_min = cvScalar(m_hueMin, m_SatMin, m_ValMin,0);
     CvScalar val_max = cvScalar(m_hueMax, m_SatMax, m_ValMax,0);
@@ -211,26 +184,17 @@ void TraitementImage::traitementImage()
     * @param: cvScalar(35, 100, 100) => scalaire de champs inférieur (-> fonction de plusieurs variables qui associe un seul nombre à chaque point de l'espace)
     * @param: cvScalar(75, 255, 255) => Scalaire de champs supérieur
     * @param: m_imgThreshed => Image de sortie de la même taille que la source et de type CV_8U
-    *   (Matrice d'entier 8 Bits non signées => IPL_DEPTH_8U)
-    /////Exemples/////
-    * @param cvScalar(40, 100, 100) : Limite inférieure de code BGR choisi => Jaune
-    * @param cvScalar(50, 255, 255) : Limite supérieure de code BGR choisi => Jaune
-    *
-    * @param cvScalar(35, 100, 100) : Limite inférieure de code BGR choisi => Jaune
-    * @param cvScalar(75, 255, 255) : Limite supérieure de code BGR choisi => Jaune
     */
-    /////Exemples/////
-    //cvInRangeS(m_imgHSV, cvScalar(0,238,238), cvScalar(0,255,255), m_imgThreshed); //3,0,179 //6,2,227 => 28,25,227
-    //cvInRangeS(m_imgHSV, cvScalar(170,160,60), cvScalar(180,256,256), m_imgThreshed);
+
     /* Contrôle dans un terminal */
     cout << "\E[32;1m TraitementImage::traitementImage(2.43) : cvInRangeS \E[m\n";
     cvInRangeS(m_imgHSV, val_min, val_max, m_imgThresholded);
 
 
-    /*** Mémoire pour les cercles de Hough ***/
+    /*** Mémoire dyanmique pour les cercles de Hough ***/
     /* Contrôle dans un terminal */
     cout << "\E[32;1m TraitementImage::traitementImage(2.44) : CvMemStorage \E[m\n";
-    CvMemStorage* storage = cvCreateMemStorage(0);
+    CvMemStorage* storageCircle = cvCreateMemStorage(0);
 
     /*** Lissage de l'image ***/
     /*
@@ -251,7 +215,7 @@ void TraitementImage::traitementImage()
 
     /*** Construction d'un cercle ***/
     /*
-    * Détermine un cercle dans une image eb fonction du niveau de gris en utilisant la transformée de hough
+    * Détermine un cercle dans une image en fonction du niveau de gris en utilisant la transformée de hough
     * C: CvSeq* cvHoughCircles(CvArr* image, void* circle_storage, int method, double dp, double min_dist, double param1=100, double param2=100, int min_radius=0, int max_radius=0 )
     *
     * @param: m_imgThresholded => Image source - 8-bit mono-canal, niveaux de gris d'entrée
@@ -262,30 +226,32 @@ void TraitementImage::traitementImage()
     *   détectés en plus d'une vraie. Si elle est trop grande, certains milieux peuvent être négligés.
     * @param: 100 => Le premier paramètre spécifique à la méthode CV_HOUGH_GRADIENT: seuil le plus élevé transmis au détecteur de bord de Canny ()
     * @param: 50 =>  Deuxième paramètre spécifique à la méthode CV_HOUGH_GRADIENT: seuil d'accumulateur pour les centres de cercle à l'étape de détection.
-    * @param: 10 => Rayon du cercle minimum.
+    * @param: 1 => Rayon du cercle minimum.
     * @param: 400 => Rayon du cercle maximum.
     *
     * @return: circles => Pointeur sur une structure de séquences dynamiques : CvSeq => séquences denses utilisées pour représenter les tableaux 1D évolutif - Vecteurs, piles, files et files doubles.
     */
     /* Contrôle dans un terminal */
     cout << "\E[32;1m TraitementImage::traitementImage(2.46) : circles \E[m\n";
-    CvSeq* circles = cvHoughCircles(m_imgThresholded, storage, CV_HOUGH_GRADIENT, 2,m_imgThresholded->height/4, 100, 50, 2, 600);
+    CvSeq* circles = cvHoughCircles(m_imgThresholded, storageCircle, CV_HOUGH_GRADIENT, 2,m_imgThresholded->height/4, 100, 50, 1, 900);
 
     /*** Dessins des cercles affichés dans l'image non traitée ***/
     for (int i = 0; i < circles->total; i++)
     {
         /* Contrôle dans un terminal */
         cout << "\E[32;1m TraitementImage::traitementImage(2.47) : cvCircle \E[m\n";
-
+        /* Pointeur sur l'élément cicles, d'indice i */
         float* p = (float*)cvGetSeqElem( circles, i );
 
         //Coordonnées du centre et rayon du cercle
-        printf("Ball! centre X=%f centre Y=%f rayon=%f\n\r",p[0],p[1],p[2] );
         cout << "Ball! centre X= " << p[0] << " centre Y= " << p[1] <<" rayon= " << p[2] << "\n\r";
+
+        /* Pour la récupération des données */
         m_cercleCentreX = p[0];
         m_cercleCentreY = p[1];
         m_cercleRayon = p[2];
         cout << m_cercleCentreX << " " << m_cercleCentreY << " " << m_cercleRayon << "\n\r";
+
         /*
         * C: void cvCircle(CvArr* img, CvPoint center, int radius, CvScalar color, int thickness=1, int line_type=8, int shift=0 )
         * @param: m_img => Image sur laquelle les cercles seront déssinés
@@ -305,18 +271,18 @@ void TraitementImage::traitementImage()
     }
 }
 
-                                                        /***************/
-                                                        /*** Getters ***/
-                                                        /***************/
+                                        /***************/
+                                        /*** Getters ***/
+                                        /***************/
 
 /***
-* Retourne l'image n'ont traitée
+* Retourne l'image n'ont traitée avec les cercles
 * @return: m_img
 */
-IplImage* TraitementImage::get_FrameImg()
+IplImage* TraitementImage::get_ImgCircles()
 {
     /* Contrôle dans un terminal */
-    cout << "\E[32;1m TraitementImage::get_FrameImg(2.6) : \E[m\n";
+    cout << "\E[32;1m TraitementImage::get_ImgCircles(2.6) : \E[m\n";
     return m_img;
 }
 
@@ -340,7 +306,7 @@ float TraitementImage::get_PointCenterCircleX()
 {
     /* Contrôle dans un terminal */
     cout << "\E[32;1m TraitementImage::get_PointCenterCircleX(2.9) : \E[m\n";
-    return m_cercleCentreX ; //&& m_cercleCentreY;
+    return m_cercleCentreX ;
 }
 
 /***
@@ -352,7 +318,7 @@ float TraitementImage::get_PointCenterCircleY()
 {
     /* Contrôle dans un terminal */
     cout << "\E[32;1m TraitementImage::get_PointCenterCircleY(2.9) : \E[m\n";
-    return m_cercleCentreY ; //&& m_cercleCentreY;
+    return m_cercleCentreY ;
 }
 
 /***

@@ -43,8 +43,9 @@ CvCapture* Camera::open()
 
     /*
     * C: CvCapture* cvCaptureFromCAM(int device)
-    * Constructeur d'un objet VideoCapture
+    * Constructeur d'un objet VideoCapture : association à une caméra
     * @param: 0 => la seule caméra connectée
+    * @param: 1 => si l'on veux choisir la seconde caméra connectée
     */
     m_Capture = cvCaptureFromCAM(0);
 
@@ -81,9 +82,9 @@ void Camera::close()
     /*
     * C: void cvReleaseImage(IplImage** image)
     * => Désalloue la mémoire associée à l'image créée
-    * @param: m_frame
+    * @param: m_Image
     */
-    cvReleaseImage(&m_frame);
+    cvReleaseImage(&m_Image);
 
     /* Contrôle dans un terminal */
     cout << "\E[31;1m Camera::close(4) :\E[m\n";
@@ -91,22 +92,21 @@ void Camera::close()
 
 
 /***
-* Méthode grabOneFrame()
+* Méthode capturedImg()
 * => Attrape et Décompresse l'image
 * @param:
-* @return: m_frame => Image décodée et numérisée
+* @return: m_Image => Image décodée et numérisée
 */
-IplImage* Camera::grabOneFrame()
+IplImage* Camera::capturedImg()
 {
     /* Contrôle dans un terminal */
-    cout << "\E[31;1m Camera::grabOneFrame(1.3) :\E[m\n";
+    cout << "\E[31;1m Camera::capturedImg(1.3) :\E[m\n";
 
     /* Vérification de la capture */
     if (!m_Capture)
-        //if (!c_kthread->startThread((void*) "cam"))
     {
         /* Contrôle dans un terminal */
-        cout << "\E[31;1m Camera::grabOneFrame : Camera close \E[m\n";
+        cout << "\E[31;1m Camera::capturedImg : Camera close \E[m\n";
         exit(0);
     }
     /*
@@ -114,30 +114,30 @@ IplImage* Camera::grabOneFrame()
      * combinent cvGrabFrame et cvRetrieveFrame en un seul appel.
      * cvGrabFrame :  Le but de cette fonction est de saisir la trame, l'image, très rapide.
      * cvRetrieveFrame retourne le pointeur à l'image attrapé avec fonction cvGrabFrame.
-     * @return: cadre attrapé => image attrapée et numérisé
+     * @return: m_Image : cadre attrapé => image attrapée et numérisé
      */
-    m_frame = cvQueryFrame(m_Capture);
+    m_Image = cvQueryFrame(m_Capture);
 
     /* Contrôle dans un terminal */
-    cout << "\E[31;1m Camera::grabOneFrame(1.4) : m_frame\E[m\n";
+    cout << "\E[31;1m Camera::capturedImg(1.4) : m_Image\E[m\n";
 
-    return m_frame;
+    return m_Image;
 }
 
 /***
-* Méthode getFrame()
+* Méthode getImage()
 * => retourne l'image traitée avec la méthode grabOneFrame()
 * @param:
-* @return: m_frame => Image décodée et numérisée
+* @return: m_Image => Image décodée et numérisée
 */
-IplImage* Camera::getFrame()
+IplImage* Camera::getImage()
 {
     /* Contrôle dans un terminal */
-    cout << "\E[31;1m Camera::getFrame(1.5) :\E[m\n";
+    cout << "\E[31;1m Camera::getImage(1.5) :\E[m\n";
 
     /* Appel de la méthode */
-    grabOneFrame();
+    capturedImg();
 
-    return m_frame;// = cvQueryFrame(m_Capture);
+    return m_Image;
 
 }

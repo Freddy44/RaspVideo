@@ -1,20 +1,20 @@
-/*********************************
+/*******************************************
  * TraitementImage.h
  *
  *      Author: Frédéric Gicquel
  *
- *********************************/
+ * Classe qui s'occupe de l'analyse et
+ * des opérations de traitement de l'image
+ ******************************************/
 
 #ifndef TRAITEMENTIMAGE_H
 #define TRAITEMENTIMAGE_H
 
 
-//#include <fstream>
 #include <stdio.h>
 #include <iostream>
 using namespace std;
 
-#include "Constantes.h"
 #include  <opencv2/opencv.hpp>
 using namespace cv;
 
@@ -24,18 +24,18 @@ using namespace cv;
 class TraitementImage
 {
 public:
-    /* Constructeur */
+    /** Constructeur */
     TraitementImage();
 
-    /* Destructeur */
+    /** Destructeur */
     virtual ~TraitementImage();
 
-    /* Getters/Setters */
+    /** Getters/Setters */
 
-    // Setter : Image capturée
+    /* Setter : Image capturée */
     void setTrackImage(IplImage*);
 
-    //Setters : Valeurs liés aux trackbars
+    /* Setters : Valeurs liés aux trackbars */
     void setHueMin(unsigned char);
     void setHueMax(unsigned char);
     void setSatMin(unsigned char);
@@ -43,26 +43,25 @@ public:
     void setValMin(unsigned char);
     void setValMax(unsigned char);
 
-    // Getters : images traitées
-    IplImage* get_FrameImg();
+    /* Getters : images traitées */
+    IplImage* get_ImgCircles();
     IplImage* get_Hsv_Frame();
     IplImage* get_ImgThresholded();
 
-    // Getters : Point du centre de cercle
+    /* Getters : Point du centre de cercle */
     float get_PointCenterCircleX();
     float get_PointCenterCircleY();
-    // Getter : rayon du cercle entourant l'objet
+    /* Getter : rayon du cercle entourant l'objet */
     float get_RadiusCircle();
 
-    /* Méthodes */
-    void traitementImage();
-    //void testTracbarCallback();
+    /** Méthodes */
+    void imageProcessing();
 
 
 protected:
 
 private:
-    /* Attributs */
+    /** Attributs */
     IplImage* m_img;
     IplImage* m_imgHSV;
     IplImage* m_imgThresholded;
@@ -78,7 +77,7 @@ private:
     float m_cercleCentreY;
     float m_cercleRayon;
 
-    /* Méthodes */
+    /** Méthodes */
 
 };
 

@@ -34,9 +34,7 @@ int Uart:: uartInit(void)
     /* Contrôle dans un terminal */
     cout << "\E[33;1m Uart (2.0): uartInit(void) \E[m\n";
 
-    //int port;
-
-    //termios - Structure contenant les options de manipulation du port
+    /* termios - Structure contenant les options de manipulation du port */
     struct termios specs; // specs => pour les options de configuration
 
     /************************/
@@ -46,18 +44,33 @@ int Uart:: uartInit(void)
     /* Contrôle dans un terminal */
     cout << "\E[33;1m Uart (2.1): uartInit(void) : Creation du portSerie \E[m\n";
 
-    //Ouverture du port et stockage du fichier de description du port
+    /** Ouverture du port et stockage du fichier de description du port*/
     //port = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY | O_NDELAY);
+    /* Méthode open()
+    * @param: "/dev/ttyACM0" => nom du port à ouvrir
+    * @param: O_CREAT => créér le fichier si inexistant
+    * @param: O_RDWR => en mode lecture/écriture
+    * @param: O_NOCTTY => afin de déterminer si ce port doit etre le controlant du processus (tty)
+    * @param: O_NONBLOCK => Pour ne pas laisser le processus appelant en attente
+    * @param: O_TRUNC => si le fichier existe, il sera troncker
+    * @return: m_port => pointeur sur le descripteur de fichier
+    */
     //Port Usb : sur raspberry/pc =>arduino
-    m_port = open("/dev/ttyACM0",O_CREAT| O_RDWR | O_NOCTTY| O_NONBLOCK |O_TRUNC );// | O_NDELAY);
+    m_port = open("/dev/ttyACM0",O_CREAT| O_RDWR | O_NOCTTY| O_NONBLOCK |O_TRUNC  );
+
+    /* Afin de vérifier que le fichier est bien ouvert */
     if (m_port == -1)
     {
-        // Could not open the port
-        perror("open_port: Unable to open ttyUSB0 - ");
+        perror("open_port: Unable to open ttyACM0 ");
     }
     else
     {
-        //leave this en mode non bloquant => |O_NONBLOCK
+        /* Afin de se livrer à des opérations sur le descripteur du port */
+        /* Méthode fcntl() : int fcntl(int fd, int cmd, struct flock *lock);
+        * @param: m_port => pointeur sur le fichier du port
+        * @param: F_SETFL => Positionner les nouveaux attributs d'état pour le fichier à la valeur indiquée par arg (= O_NONBLOCK)
+        * @param: fcntl(m_port,F_GETFL)&~O_NONBLOCK => callback afin de maintenir le port en mode bloqué
+        */
         fcntl(m_port, F_SETFL, fcntl(m_port,F_GETFL)&~O_NONBLOCK);
     }
 
@@ -67,66 +80,66 @@ int Uart:: uartInit(void)
 
     /* Contrôle dans un terminal */
     cout << "\E[33;1m Uart (2.2): uartInit(void) : Configuration de la liaison \E[m\n";
-    /*Retrieving and changing terminal settings
-    tcgetattr() gets the parameters associated with the object referred  by
-    port  and  stores  them in the termios structure referenced by termios_p.
-    This function may be invoked from a background  process;  however,  the
-    terminal  attributes  may  be  subsequently  changed  by  a  foreground
-    process.*/
-    //lecture des paramètres courant
+
+    /* Les fonctions termios établissent une interface générale sous forme de terminal, permettant de contrôler les ports de communication asynchrone*/
+    /*Fonction int tcgetattr(int fd, struct termios *termios_p);
+    * récupère les paramètres associés à l'objet référencé par fd et les stocke dans la structure termios pointée par termios_p
+    * @param: m_port => nom du fichier
+    * @param: &specs => pointeur sur les @ des parametres
+    */
     tcgetattr(m_port, &specs);
 
-
-    /*tcflag_t c_cflag;*/      /* modes de contrôle */
-    /*9600 baud
-      CS8 8 bits n 1
-      CLOCAL connexion locale, pas de contrôle par le modem
-      CREAD  permet la réception des caractères
-      CRTSCTS : contrôle de flux matériel (uniquement utilisé si le câble a
-     les lignes nécessaires.
+    /** Modes de contrôle */
+    /*tcflag_t c_cflag;
+    * @param: 9600 baud
+    * @param: CS8 => 8 bits n 1
+    * @param: CLOCAL => connexion locale, pas de contrôle par le modem
+    * @param: CREAD  => permet la réception des caractères
+    * @return: specs.c_cflag => paramètres de contrôle
     */
-    specs.c_cflag = (9600 |CS8| CLOCAL | CREAD);// |CRTSCTS ); //control flags
+    specs.c_cflag = (9600 |CS8| CLOCAL | CREAD);
 
-
-    /*tcflag_t c_oflag;*/      /* modes de sorties */
-    /*OPOST  Enable implementation-defined output processing.
-          CR3 - delay of 150ms after transmitting every line
+    /** Modes de sorties */
+    /*tcflag_t c_oflag;
+    * @param: OPOST =>  Traitement en sortie dépendant de l'implémentation
+    * @param: CR3 => Masque du délai du retour chariot fixé à 150ms
+    * @return: specs.c_oflag => paramètres de sortie
     */
     specs.c_oflag = (OPOST | CR3);
 
-
+    /** Modes locaux */
     /*
      ICANON  : active l'entrée en mode canonique
      désactive toute fonctionnalité d'echo, et n'envoit pas de signal au
      programme appelant.
      specs.c_lflag = ICANON;
     */
-    /*tcflag_t c_lflag;*/      /* modes locaux */
-    /* positionne le mode de lecture (non canonique, sans echo, ...) */
-    /* L'entrée non canonique va prendre en charge un nombre fixé de caractère par lecture, et 		autorise l'utilisation d'un compteur de temps pour les caractères. Ce mode doit être utilisé si 	votre application lira toujours un nombre fixé de caractères*/
-    specs.c_lflag = 0;
-    //specs.c_lflag = ICANON;
-
-
-    /*
-     IGNPAR  : ignore les octets ayant une erreur de parité.
-     ICRNL   : transforme CR en NL (sinon un CR de l'autre côté de la ligne
-     ne terminera pas l'entrée).
-     sinon, utiliser l'entrée sans traitement (device en mode raw).
+    /*tcflag_t c_lflag;
+    * Positionne le mode de lecture (non canonique, sans echo, ...)
+    * L'entrée non canonique va prendre en charge un nombre fixé de caractère par lecture, et
+    * autorise l'utilisation d'un compteur de temps pour les caractères. Ce mode doit être utilisé si
+    * votre application lira toujours un nombre fixé de caractères
     */
-    specs.c_iflag = IGNPAR |ICRNL;//| IGNCR;
+    specs.c_lflag = 0;
 
+    /** Modes d'entrée */
+    /*
+    * @param: IGNPAR => ignore les octets ayant une erreur de parité.
+    * @param: ICRNL  => transforme CR en NL (sinon un CR de l'autre côté de la ligne
+    * ne terminera pas l'entrée).
+    * @return: specs.c_iflag => paramètres d'entrée
+    */
+    specs.c_iflag = IGNPAR |ICRNL;
 
-    /* cc_t c_cc[NCCS]; */     /* Caractères de contrôle */
+    /** Caractères de contrôle */
+    /* cc_t c_cc[NCCS]; */
     /* Caracteres immediatement disponibles */
     specs.c_cc[VMIN] = 1;	/*  en mode non-canonique, spécifie le nombre de caractéres que doit contenir le tampon pour être accessible à la lecture. En général, on fixe cette valeur à 1. */
     specs.c_cc[VTIME] = 0;	/* en mode non-canonique, spécifie, en dixièmes de seconde, le temps au bout duquel un caractère devient accessible, même si le tampon ne contient pas c_cc[VMIN] caractères. Une valeur de 0 représente un temps infini.  */
 
-    //our custom specifications set to the port
-    //TCSANOW - constant that prompts the system to set
-    //specifications immediately.
 
-    /* pour éliminer tous les caractères reçus par le noyau mais non encore lus par read()
+    /*
+    *  élimine toutes les écritures sur l'objet fd pas encore transmises, ainsi que les données reçues mais pas encore lues, ceci en fonction de la valeur de queue_selector :
     */
     tcflush(m_port, TCIFLUSH);
 
@@ -136,11 +149,11 @@ int Uart:: uartInit(void)
     /* Contrôle dans un terminal */
     cout << "\E[33;1m Uart (2.3): uartInit(void) : Sauvegarde de la config du portSerie \E[m\n";
 
-    /* tcsetattr() sets the parameters associated with  the  terminal  (unless
-        support is required from the underlying hardware that is not available)
-        from the termios structure referred to by termios_p.   optional_actions
-        specifies when the changes take effect:
-    TCSANOW - constant that prompts the system to set*/
+    /* tcsetattr() fixe les paramètres du terminal
+    * @param: m_port => Pointeur sur le descripteur du port
+    * @param: TCSANOW => Les modifications sont effectuées immédiatement.
+    * @param: &specs => Paramètres à fixer
+    */
     tcsetattr(m_port,TCSANOW,&specs);
 
     /* Contrôle dans un terminal */
@@ -149,18 +162,28 @@ int Uart:: uartInit(void)
     return (m_port);
 }
 
+/***
+* Méthode uartClose()
+* Ferme le port
+* @param:
+* @return:
+*/
+void Uart::uartClose()
+{
+    close (m_port);
+}
 
+/***
+* Getter Méthode getPort()
+* renvoie un id sur le descripteur du port
+* @param:
+* @return:
+*/
 int Uart::getPort()
 {
     uartInit();
     int port = m_port;
     return port;
-}
-
-void Uart::uartClose()
-{
-    close (m_port);
-
 }
 
 /***
